@@ -82,7 +82,7 @@
 <body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
 
     <!-- Main Application Container -->
-    <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-3xl">
+    <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-5xl">
 
         <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">ODE Mastery</h1>
         <p class="text-center text-gray-500 mb-2">A learning and exploration tool</p>
@@ -215,11 +215,18 @@
                     <span class="font-semibold">Damping Type:</span> <span id="damping-type" class="font-bold text-indigo-600">Critically Damped</span>
                 </div>
 
-                <!-- Plot Canvas -->
-                <div class="relative w-full h-96">
-                    <canvas id="solution-canvas" width="600" height="400"></canvas>
-                    <div id="no-solution-message" class="absolute inset-0 flex items-center justify-center text-gray-500 hidden">
-                        Cannot plot solution. Please check your parameters.
+                <!-- Plot Canvases with Toggle Switch -->
+                <div class="relative w-full">
+                    <div class="flex justify-center mb-4 space-x-2">
+                        <button id="time-plot-btn" onclick="togglePlotView('time')" class="px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 selected-btn">Time Domain ($y$ vs $t$)</button>
+                        <button id="phase-plot-btn" onclick="togglePlotView('phase')" class="px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 bg-gray-200 text-gray-800 hover:bg-gray-300">Phase Space ($y'$ vs $y$)</button>
+                    </div>
+                    <div id="plot-container" class="relative w-full h-96">
+                        <canvas id="solution-canvas" class="absolute w-full h-full"></canvas>
+                        <canvas id="phase-space-canvas" class="absolute w-full h-full hidden"></canvas>
+                        <div id="no-solution-message" class="absolute inset-0 flex items-center justify-center text-gray-500 hidden">
+                            Cannot plot solution. Please check your parameters.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -271,9 +278,13 @@
         const tStartInput = document.getElementById('t_start-input');
         const tEndInput = document.getElementById('t_end-input');
         const dampingTypeDisplay = document.getElementById('damping-type');
-        const canvas = document.getElementById('solution-canvas');
-        const ctx = canvas.getContext('2d');
+        const solutionCanvas = document.getElementById('solution-canvas');
+        const phaseSpaceCanvas = document.getElementById('phase-space-canvas');
+        const solutionCtx = solutionCanvas.getContext('2d');
+        const phaseSpaceCtx = phaseSpaceCanvas.getContext('2d');
         const noSolutionMessage = document.getElementById('no-solution-message');
+        const timePlotBtn = document.getElementById('time-plot-btn');
+        const phasePlotBtn = document.getElementById('phase-plot-btn');
 
 
         const levelTitles = {
@@ -315,7 +326,18 @@
             mainMenuContainer.classList.add('hidden');
             odeMasteryContainer.classList.add('hidden');
             interactiveToolContainer.classList.remove('hidden');
-            plotSolution();
+            // Set up resize observer for responsive canvas
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    solutionCanvas.width = width;
+                    solutionCanvas.height = height;
+                    phaseSpaceCanvas.width = width;
+                    phaseSpaceCanvas.height = height;
+                }
+                plotSolutions();
+            });
+            resizeObserver.observe(document.getElementById('plot-container'));
             setupInteractiveToolListeners();
         };
 
@@ -743,16 +765,20 @@
         };
 
         // --- Interactive Tool Functions ---
-        function drawAxes(minX, maxX, minY, maxY) {
-            const padding = 40;
+        // Helper function to draw axes on a canvas
+        function drawAxes(ctx, canvas, minX, maxX, minY, maxY, xLabel, yLabel) {
+            const padding = Math.max(40, Math.min(canvas.width, canvas.height) * 0.08); // Responsive padding
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
+            const plotWidth = canvasWidth - 2 * padding;
+            const plotHeight = canvasHeight - 2 * padding;
+            const fontSize = Math.max(10, Math.min(canvas.width, canvas.height) * 0.025); // Responsive font size
 
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             ctx.fillStyle = '#1f2937';
             ctx.strokeStyle = '#d1d5db';
             ctx.lineWidth = 1;
-            ctx.font = '12px Inter';
+            ctx.font = `${fontSize}px Inter`;
 
             // Draw X-axis
             ctx.beginPath();
@@ -770,9 +796,9 @@
             const numXLabels = 5;
             const xStep = (maxX - minX) / numXLabels;
             for (let i = 0; i <= numXLabels; i++) {
-                const x = padding + (i / numXLabels) * (canvasWidth - 2 * padding);
+                const x = padding + (i / numXLabels) * plotWidth;
                 const label = (minX + i * xStep).toFixed(1);
-                ctx.fillText(label, x - 10, canvasHeight - padding + 20);
+                ctx.fillText(label, x - ctx.measureText(label).width / 2, canvasHeight - padding + fontSize * 2);
                 ctx.beginPath();
                 ctx.moveTo(x, canvasHeight - padding);
                 ctx.lineTo(x, canvasHeight - padding + 5);
@@ -783,9 +809,9 @@
             const numYLabels = 5;
             const yStep = (maxY - minY) / numYLabels;
             for (let i = 0; i <= numYLabels; i++) {
-                const y = canvasHeight - padding - (i / numYLabels) * (canvasHeight - 2 * padding);
+                const y = canvasHeight - padding - (i / numYLabels) * plotHeight;
                 const label = (minY + i * yStep).toFixed(1);
-                ctx.fillText(label, padding - 35, y + 5);
+                ctx.fillText(label, padding - fontSize * 4, y + fontSize / 2);
                 ctx.beginPath();
                 ctx.moveTo(padding, y);
                 ctx.lineTo(padding - 5, y);
@@ -793,15 +819,36 @@
             }
 
             // Axis labels
-            ctx.fillText("Time (t)", canvasWidth / 2 - 20, canvasHeight - 5);
+            ctx.fillText(xLabel, canvasWidth / 2 - ctx.measureText(xLabel).width / 2, canvasHeight - fontSize);
             ctx.save();
-            ctx.translate(15, canvasHeight / 2);
+            ctx.translate(padding / 2, canvasHeight / 2);
             ctx.rotate(-Math.PI / 2);
-            ctx.fillText("y(t)", 0, 0);
+            ctx.fillText(yLabel, -ctx.measureText(yLabel).width / 2, 0);
             ctx.restore();
         }
 
-        function plotSolution() {
+        // Function to handle plot view toggling
+        window.togglePlotView = function(view) {
+            if (view === 'time') {
+                solutionCanvas.classList.remove('hidden');
+                phaseSpaceCanvas.classList.add('hidden');
+                timePlotBtn.classList.add('selected-btn');
+                timePlotBtn.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+                phasePlotBtn.classList.remove('selected-btn');
+                phasePlotBtn.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+            } else if (view === 'phase') {
+                solutionCanvas.classList.add('hidden');
+                phaseSpaceCanvas.classList.remove('hidden');
+                phasePlotBtn.classList.add('selected-btn');
+                phasePlotBtn.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+                timePlotBtn.classList.remove('selected-btn');
+                timePlotBtn.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+            }
+            plotSolutions();
+        };
+
+        // Main function to calculate and plot both solutions
+        function plotSolutions() {
             const b = parseFloat(bInput.value);
             const c = parseFloat(cInput.value);
             const y0 = parseFloat(y0Input.value);
@@ -810,106 +857,195 @@
             const tEnd = parseFloat(tEndInput.value);
 
             if (isNaN(b) || isNaN(c) || isNaN(y0) || isNaN(yp0) || isNaN(tStart) || isNaN(tEnd) || tStart >= tEnd) {
-                drawAxes(0, 1, 0, 1);
+                // If any input is invalid, clear plots and show error
+                drawAxes(solutionCtx, solutionCanvas, 0, 1, 0, 1, "Time (t)", "y(t)");
+                drawAxes(phaseSpaceCtx, phaseSpaceCanvas, 0, 1, 0, 1, "y(t)", "y'(t)");
                 noSolutionMessage.classList.remove('hidden');
                 return;
             }
             noSolutionMessage.classList.add('hidden');
 
+            // Calculate solution functions
+            const { solutionFunc, derivativeFunc, dampingType } = calculateSolution(b, c, y0, yp0);
+
+            // Update damping type display
+            dampingTypeDisplay.textContent = dampingType;
+            dampingTypeDisplay.className = 'font-bold';
+            if (dampingType === 'Undamped') dampingTypeDisplay.classList.add('text-green-600');
+            else if (dampingType === 'Lightly Damped') dampingTypeDisplay.classList.add('text-blue-600');
+            else if (dampingType === 'Critically Damped') dampingTypeDisplay.classList.add('text-yellow-600');
+            else if (dampingType === 'Overdamped') dampingTypeDisplay.classList.add('text-red-600');
+            else dampingTypeDisplay.classList.add('text-gray-600');
+
+            // Generate data points
+            const points = generateSolutionPoints(solutionFunc, derivativeFunc, tStart, tEnd);
+
+            // Plot on canvases
+            drawTimeDomainPlot(points, tStart, tEnd);
+            drawPhaseSpacePlot(points);
+        }
+
+        // Function to calculate the solution functions based on coefficients
+        function calculateSolution(b, c, y0, yp0) {
             const D = b * b - 4 * c; // Discriminant
             const epsilon = 1e-9; // Tolerance for floating-point comparison
             let solutionFunc;
-            let type = '';
+            let derivativeFunc;
+            let dampingType = '';
 
             if (b === 0 && c > 0) {
                 // Undamped
-                type = 'Undamped';
+                dampingType = 'Undamped';
                 const omega = Math.sqrt(c);
                 const A = y0;
                 const B = yp0 / omega;
                 solutionFunc = t => A * Math.cos(omega * t) + B * Math.sin(omega * t);
+                derivativeFunc = t => -A * omega * Math.sin(omega * t) + B * omega * Math.cos(omega * t);
             } else if (Math.abs(D) < epsilon) {
                 // Critically Damped
-                type = 'Critically Damped';
+                dampingType = 'Critically Damped';
                 const r = -b / 2;
                 const C1 = y0;
                 const C2 = yp0 - r * y0;
                 solutionFunc = t => (C1 + C2 * t) * Math.exp(r * t);
+                derivativeFunc = t => C2 * Math.exp(r * t) + r * (C1 + C2 * t) * Math.exp(r * t);
             } else if (D > 0) {
                 // Overdamped
-                type = 'Overdamped';
+                dampingType = 'Overdamped';
                 const r1 = (-b + Math.sqrt(D)) / 2;
                 const r2 = (-b - Math.sqrt(D)) / 2;
                 const C1 = (yp0 - r2 * y0) / (r1 - r2);
                 const C2 = y0 - C1;
                 solutionFunc = t => C1 * Math.exp(r1 * t) + C2 * Math.exp(r2 * t);
+                derivativeFunc = t => C1 * r1 * Math.exp(r1 * t) + C2 * r2 * Math.exp(r2 * t);
             } else if (D < 0) {
                 // Lightly Damped (Underdamped)
-                type = 'Lightly Damped';
+                dampingType = 'Lightly Damped';
                 const alpha = -b / 2;
                 const beta = Math.sqrt(-D) / 2;
                 const C1 = y0;
                 const C2 = (yp0 - alpha * y0) / beta;
                 solutionFunc = t => Math.exp(alpha * t) * (C1 * Math.cos(beta * t) + C2 * Math.sin(beta * t));
+                derivativeFunc = t => alpha * Math.exp(alpha * t) * (C1 * Math.cos(beta * t) + C2 * Math.sin(beta * t)) + Math.exp(alpha * t) * (-C1 * beta * Math.sin(beta * t) + C2 * beta * Math.cos(beta * t));
+            } else {
+                // Fallback for cases with no solution (e.g., c < 0, b=0)
+                dampingType = 'Unstable';
+                solutionFunc = () => 0;
+                derivativeFunc = () => 0;
             }
 
-            dampingTypeDisplay.textContent = type;
-            dampingTypeDisplay.className = 'font-bold';
-            if (type === 'Undamped') dampingTypeDisplay.classList.add('text-green-600');
-            else if (type === 'Lightly Damped') dampingTypeDisplay.classList.add('text-blue-600');
-            else if (type === 'Critically Damped') dampingTypeDisplay.classList.add('text-yellow-600');
-            else if (type === 'Overdamped') dampingTypeDisplay.classList.add('text-red-600');
-            else dampingTypeDisplay.classList.add('text-gray-600');
+            return { solutionFunc, derivativeFunc, dampingType };
+        }
 
-            const width = canvas.width;
-            const height = canvas.height;
-            const plotWidth = width - 80; // Padding
-            const plotHeight = height - 80; // Padding
+        // Function to generate data points for plotting
+        function generateSolutionPoints(solutionFunc, derivativeFunc, tStart, tEnd) {
             const points = [];
             const step = (tEnd - tStart) / 1000;
+            for (let t = tStart; t <= tEnd; t += step) {
+                const y = solutionFunc(t);
+                const yp = derivativeFunc(t);
+                points.push({t, y, yp});
+            }
+            return points;
+        }
+
+        // Function to plot the time-domain solution
+        function drawTimeDomainPlot(points, tStart, tEnd) {
+            const width = solutionCanvas.width;
+            const height = solutionCanvas.height;
+            const padding = Math.max(40, Math.min(width, height) * 0.08);
+            const plotWidth = width - 2 * padding;
+            const plotHeight = height - 2 * padding;
+
             let minY = Infinity;
             let maxY = -Infinity;
 
-            for (let t = tStart; t <= tEnd; t += step) {
-                const y = solutionFunc(t);
-                points.push({t, y});
-                if (y > maxY) maxY = y;
-                if (y < minY) minY = y;
-            }
+            points.forEach(point => {
+                if (point.y > maxY) maxY = point.y;
+                if (point.y < minY) minY = point.y;
+            });
 
             const yRange = maxY - minY;
             const yPadding = yRange * 0.1 || 1;
             const yMinAdjusted = minY - yPadding;
             const yMaxAdjusted = maxY + yPadding;
 
-            drawAxes(tStart, tEnd, yMinAdjusted, yMaxAdjusted);
+            drawAxes(solutionCtx, solutionCanvas, tStart, tEnd, yMinAdjusted, yMaxAdjusted, "Time (t)", "y(t)");
 
             // Draw solution
-            ctx.beginPath();
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
+            solutionCtx.beginPath();
+            solutionCtx.strokeStyle = '#4f46e5';
+            solutionCtx.lineWidth = 2;
 
             points.forEach((point, index) => {
-                const x = 40 + (point.t - tStart) / (tEnd - tStart) * plotWidth;
-                const y = 40 + (1 - (point.y - yMinAdjusted) / (yMaxAdjusted - yMinAdjusted)) * plotHeight;
+                const x = padding + (point.t - tStart) / (tEnd - tStart) * plotWidth;
+                const y = padding + (1 - (point.y - yMinAdjusted) / (yMaxAdjusted - yMinAdjusted)) * plotHeight;
                 if (index === 0) {
-                    ctx.moveTo(x, y);
+                    solutionCtx.moveTo(x, y);
                 } else {
-                    ctx.lineTo(x, y);
+                    solutionCtx.lineTo(x, y);
                 }
             });
-            ctx.stroke();
+            solutionCtx.stroke();
+        }
+
+        // Function to plot the phase space
+        function drawPhaseSpacePlot(points) {
+            const width = phaseSpaceCanvas.width;
+            const height = phaseSpaceCanvas.height;
+            const padding = Math.max(40, Math.min(width, height) * 0.08);
+            const plotWidth = width - 2 * padding;
+            const plotHeight = height - 2 * padding;
+
+            let minY = Infinity;
+            let maxY = -Infinity;
+            let minX = Infinity;
+            let maxX = -Infinity;
+
+            points.forEach(point => {
+                if (point.y > maxY) maxY = point.y;
+                if (point.y < minY) minY = point.y;
+                if (point.yp > maxX) maxX = point.yp; // x-axis for phase space is y(t)
+                if (point.yp < minX) minX = point.yp; // y-axis for phase space is y'(t)
+            });
+
+            // Adjust ranges
+            const xRange = maxY - minY;
+            const xPadding = xRange * 0.1 || 1;
+            const xMinAdjusted = minY - xPadding;
+            const xMaxAdjusted = maxY + xPadding;
+
+            const yRange = maxX - minX;
+            const yPadding = yRange * 0.1 || 1;
+            const yMinAdjusted = minX - yPadding;
+            const yMaxAdjusted = maxX + yPadding;
+
+            drawAxes(phaseSpaceCtx, phaseSpaceCanvas, xMinAdjusted, xMaxAdjusted, yMinAdjusted, yMaxAdjusted, "y(t)", "y'(t)");
+
+            // Draw phase space curve
+            phaseSpaceCtx.beginPath();
+            phaseSpaceCtx.strokeStyle = '#4f46e5';
+            phaseSpaceCtx.lineWidth = 2;
+
+            points.forEach((point, index) => {
+                const x = padding + (point.y - xMinAdjusted) / (xMaxAdjusted - xMinAdjusted) * plotWidth;
+                const y = padding + (1 - (point.yp - yMinAdjusted) / (yMaxAdjusted - yMinAdjusted)) * plotHeight;
+                if (index === 0) {
+                    phaseSpaceCtx.moveTo(x, y);
+                } else {
+                    phaseSpaceCtx.lineTo(x, y);
+                }
+            });
+            phaseSpaceCtx.stroke();
         }
 
         function setupInteractiveToolListeners() {
-            bInput.addEventListener('input', plotSolution);
-            cInput.addEventListener('input', plotSolution);
-            y0Input.addEventListener('input', plotSolution);
-            yp0Input.addEventListener('input', plotSolution);
-            tStartInput.addEventListener('input', plotSolution);
-            tEndInput.addEventListener('input', plotSolution);
-            window.addEventListener('resize', plotSolution);
-            plotSolution();
+            bInput.addEventListener('input', plotSolutions);
+            cInput.addEventListener('input', plotSolutions);
+            y0Input.addEventListener('input', plotSolutions);
+            yp0Input.addEventListener('input', plotSolutions);
+            tStartInput.addEventListener('input', plotSolutions);
+            tEndInput.addEventListener('input', plotSolutions);
         }
 
         // Initial setup on page load
