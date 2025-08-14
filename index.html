@@ -65,93 +65,184 @@
             border-color: #4338ca; /* indigo-700 */
             color: white;
         }
+        .progress-bar-segment {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #e5e7eb;
+        }
+        canvas {
+            display: block;
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid #d1d5db; /* Added border */
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
 
     <!-- Main Application Container -->
-    <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl">
+    <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-3xl">
 
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">ODE Mastery Strategy</h1>
-        <p class="text-center text-gray-500 mb-8">Prototype for the first four levels</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">ODE Mastery</h1>
+        <p class="text-center text-gray-500 mb-2">A learning and exploration tool</p>
 
-        <!-- Progress Tracker -->
-        <div id="progress-tracker" class="flex justify-between items-center mb-8 px-4 sm:px-12">
-            <div id="tracker-1" class="tracker-item active" onclick="handleTrackerClick(1)">1</div>
-            <div class="h-1 w-1/4 bg-gray-300 mx-2"></div>
-            <div id="tracker-2" class="tracker-item" onclick="handleTrackerClick(2)">2</div>
-            <div class="h-1 w-1/4 bg-gray-300 mx-2"></div>
-            <div id="tracker-3" class="tracker-item" onclick="handleTrackerClick(3)">3</div>
-            <div class="h-1 w-1/4 bg-gray-300 mx-2"></div>
-            <div id="tracker-4" class="tracker-item" onclick="handleTrackerClick(4)">4</div>
+        <!-- Main Menu -->
+        <div id="main-menu-container" class="step-container">
+            <h2 class="text-2xl font-semibold mb-6 text-center">Choose Your Path</h2>
+            <div class="space-y-4">
+                <button onclick="showOdeMastery()" class="w-full py-4 bg-indigo-600 text-white rounded-lg font-semibold text-xl hover:bg-indigo-700 transition-colors duration-300">
+                    ODE Mastery Strategy
+                </button>
+                <button onclick="showInteractiveTool()" class="w-full py-4 bg-gray-600 text-white rounded-lg font-semibold text-xl hover:bg-gray-700 transition-colors duration-300">
+                    Interactive Solutions Tool
+                </button>
+            </div>
         </div>
 
-        <!-- Message Box for persistent feedback -->
-        <div id="message-box" class="hidden p-4 mb-6 text-sm text-blue-800 rounded-lg bg-blue-50"></div>
-
-        <!-- Level 1: Quick ID Quiz -->
-        <div id="level-1-container" class="step-container">
-            <h2 class="text-2xl font-semibold mb-4 text-center">Level 1: Identify Standard Second-Order ODEs</h2>
-            <p class="text-gray-700 mb-6">Which of these are a **second-order constant-coefficient linear homogeneous ODE**? Select 'Yes' or 'No' for each.</p>
-
-            <div id="level-1-questions" class="space-y-4">
-                <!-- Questions will be dynamically inserted here -->
+        <!-- ODE Mastery Container -->
+        <div id="ode-mastery-container" class="step-container hidden">
+            <!-- Score Display -->
+            <div class="text-center text-xl font-bold text-gray-700 mb-8">
+                Score: <span id="user-score">0</span>
             </div>
 
-            <button id="level-1-submit" onclick="submitQuiz()" class="mt-8 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-300">Submit Answers</button>
-            <button id="level-1-new-quiz-btn" onclick="resetLevel1()" class="hidden mt-4 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Try Another Level 1 Quiz</button>
-            <button id="next-level-btn" onclick="startLevel(2)" class="hidden mt-4 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition-colors duration-300">Continue to Level 2</button>
+            <!-- Progress Tracker -->
+            <div id="progress-tracker" class="flex justify-between items-center mb-8 px-4 sm:px-4 flex-wrap">
+                <div id="tracker-1" class="tracker-item active" onclick="handleTrackerClick(1)">1</div>
+                <div class="h-1 flex-grow bg-gray-300 mx-1"></div>
+                <div id="tracker-2" class="tracker-item" onclick="handleTrackerClick(2)">2</div>
+                <div class="h-1 flex-grow bg-gray-300 mx-1"></div>
+                <div id="tracker-3" class="tracker-item" onclick="handleTrackerClick(3)">3</div>
+                <div class="h-1 flex-grow bg-gray-300 mx-1"></div>
+                <div id="tracker-4" class="tracker-item" onclick="handleTrackerClick(4)">4</div>
+                <div class="h-1 flex-grow bg-gray-300 mx-1"></div>
+                <div id="tracker-5" class="tracker-item" onclick="handleTrackerClick(5)">5</div>
+                <div class="h-1 flex-grow bg-gray-300 mx-1"></div>
+                <div id="tracker-6" class="tracker-item" onclick="handleTrackerClick(6)">6</div>
+            </div>
+
+            <!-- Message Box for persistent feedback -->
+            <div id="message-box" class="hidden p-4 mb-6 text-sm text-blue-800 rounded-lg bg-blue-50"></div>
+
+            <!-- Level 1: Quick ID Quiz -->
+            <div id="level-1-container" class="step-container">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Level 1: Identify Standard Second-Order ODEs</h2>
+                <p class="text-gray-700 mb-6">Which of these are a **second-order constant-coefficient linear homogeneous ODE**? Select 'Yes' or 'No' for each.</p>
+
+                <div id="level-1-questions" class="space-y-4">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <button id="level-1-submit" onclick="submitQuiz()" class="mt-8 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-300">Submit Answers</button>
+                <button id="level-1-new-quiz-btn" onclick="resetLevel1()" class="hidden mt-4 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Try Another Level 1 Quiz</button>
+                <button id="next-level-btn" onclick="startLevel(2)" class="hidden mt-4 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition-colors duration-300">Continue to Level 2</button>
+            </div>
+
+            <!-- AI-Guided Solver Container for Levels 2, 3, 4, and 5 -->
+            <div id="ai-level-container" class="step-container hidden">
+                <h2 id="ai-level-title" class="text-2xl font-semibold mb-4 text-center"></h2>
+                <p id="ai-level-subtitle" class="text-gray-700 mb-6"></p>
+
+                <div id="conversation-container" class="bg-gray-50 p-4 rounded-lg h-96 overflow-y-auto flex flex-col space-y-4 mb-4">
+                    <!-- AI and user messages will be injected here -->
+                    <div id="loading-spinner" class="hidden flex justify-center items-center h-full">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                    </div>
+                </div>
+
+                <div class="flex">
+                    <input type="text" id="user-input" placeholder="Enter your answer here..." class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="submit-btn" onclick="submitAIResponse()" class="px-6 py-3 bg-blue-600 text-white rounded-r-lg font-semibold hover:bg-blue-700 transition-colors duration-300">Submit</button>
+                </div>
+                <button id="ai-next-level-btn" onclick="" class="hidden mt-4 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition-colors duration-300">Continue</button>
+                <button id="ai-new-example-btn" onclick="" class="hidden mt-4 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Try Another Example</button>
+            </div>
+
+            <!-- Level 6: Damping Classification -->
+            <div id="level-6-container" class="step-container hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Level 6: Damping Classification</h2>
+                <p class="text-gray-700 mb-6">Match each ODE to its damping characteristic by selecting the correct option.</p>
+
+                <div id="level-6-questions" class="space-y-6">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <button id="level-6-submit" onclick="submitLevel6Quiz()" class="mt-8 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-300">Submit Answers</button>
+                <button id="level-6-new-quiz-btn" onclick="resetLevel6()" class="hidden mt-4 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Try Another Level 6 Quiz</button>
+                <button id="level-6-finish-btn" onclick="showMenu()" class="hidden mt-4 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition-colors duration-300">Return to Main Menu</button>
+            </div>
+             <!-- New button to return to the main menu from any level -->
+            <button onclick="showMenu()" class="mt-8 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Return to Main Menu</button>
         </div>
 
-        <!-- AI-Guided Solver Container for Levels 2, 3, and 4 -->
-        <div id="ai-level-container" class="step-container hidden">
-            <h2 id="ai-level-title" class="text-2xl font-semibold mb-4 text-center"></h2>
-            <p id="ai-level-subtitle" class="text-gray-700 mb-6"></p>
+        <!-- Interactive Tool Container -->
+        <div id="interactive-tool-container" class="step-container hidden">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Interactive Solutions Tool</h2>
+            <p class="text-gray-700 mb-6">Explore how changing coefficients and initial conditions affects the solution to the ODE: $y'' + by' + cy = 0$.</p>
 
-            <div id="conversation-container" class="bg-gray-50 p-4 rounded-lg h-96 overflow-y-auto flex flex-col space-y-4 mb-4">
-                <!-- AI and user messages will be injected here -->
-                <div id="loading-spinner" class="hidden flex justify-center items-center h-full">
-                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+            <div class="flex flex-col space-y-4">
+                <!-- Input Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="b-input" class="font-semibold w-1/4">b:</label>
+                        <input type="number" id="b-input" value="1" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="c-input" class="font-semibold w-1/4">c:</label>
+                        <input type="number" id="c-input" value="1" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="y0-input" class="font-semibold w-1/4">y(0):</label>
+                        <input type="number" id="y0-input" value="1" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="yp0-input" class="font-semibold w-1/4">y'(0):</label>
+                        <input type="number" id="yp0-input" value="0" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="t_start-input" class="font-semibold w-1/4">t start:</label>
+                        <input type="number" id="t_start-input" value="0" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="t_end-input" class="font-semibold w-1/4">t end:</label>
+                        <input type="number" id="t_end-input" value="10" step="0.1" class="w-3/4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Damping Type Display -->
+                <div class="bg-gray-100 p-4 rounded-lg text-center">
+                    <span class="font-semibold">Damping Type:</span> <span id="damping-type" class="font-bold text-indigo-600">Critically Damped</span>
+                </div>
+
+                <!-- Plot Canvas -->
+                <div class="relative w-full h-96">
+                    <canvas id="solution-canvas" width="600" height="400"></canvas>
+                    <div id="no-solution-message" class="absolute inset-0 flex items-center justify-center text-gray-500 hidden">
+                        Cannot plot solution. Please check your parameters.
+                    </div>
                 </div>
             </div>
 
-            <div class="flex">
-                <input type="text" id="user-input" placeholder="Enter your answer here..." class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="submit-btn" onclick="submitAIResponse()" class="px-6 py-3 bg-blue-600 text-white rounded-r-lg font-semibold hover:bg-blue-700 transition-colors duration-300">Submit</button>
-            </div>
-            <button id="ai-next-level-btn" onclick="" class="hidden mt-4 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition-colors duration-300">Continue</button>
-            <button id="ai-new-example-btn" onclick="" class="hidden mt-4 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Try Another Example</button>
+            <button onclick="showMenu()" class="mt-8 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg hover:bg-gray-600 transition-colors duration-300">Return to Main Menu</button>
         </div>
+
     </div>
 
     <script>
         // Global variables and constants
         let userAnswers = {};
         let level1CorrectAnswers = {};
+        let level6CorrectAnswers = {};
         let chatHistory = [];
         let currentLevel = 1;
-
-        // This is the flag to control whether skipping is allowed.
-        // Set to `true` for testing purposes, `false` for students.
+        let userScore = 0;
         let allowSkip = true;
 
-        const levelTitles = {
-            2: "Level 2: Real, Distinct Roots",
-            3: "Level 3: Real, Repeated Roots",
-            4: "Level 4: Complex Conjugate Roots"
-        };
-        const levelTopics = {
-            2: "ODEs with real, distinct roots.",
-            3: "ODEs with real, repeated roots.",
-            4: "ODEs with complex conjugate roots."
-        };
-        const levelInitialPrompts = {
-            2: "Generate a second-order linear homogeneous ODE with real distinct roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction.",
-            3: "Generate a second-order linear homogeneous ODE with real repeated roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction.",
-            4: "Generate a second-order linear homogeneous ODE with complex conjugate roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction."
-        };
-
         // DOM elements
+        const mainMenuContainer = document.getElementById('main-menu-container');
+        const odeMasteryContainer = document.getElementById('ode-mastery-container');
+        const interactiveToolContainer = document.getElementById('interactive-tool-container');
         const messageBox = document.getElementById('message-box');
         const nextLevelBtn = document.getElementById('next-level-btn');
         const level1Container = document.getElementById('level-1-container');
@@ -166,8 +257,74 @@
         const aiLevelSubtitle = document.getElementById('ai-level-subtitle');
         const aiNextLevelBtn = document.getElementById('ai-next-level-btn');
         const aiNewExampleBtn = document.getElementById('ai-new-example-btn');
+        const userScoreDisplay = document.getElementById('user-score');
+        const level6Container = document.getElementById('level-6-container');
+        const level6SubmitBtn = document.getElementById('level-6-submit');
+        const level6NewQuizBtn = document.getElementById('level-6-new-quiz-btn');
+        const level6FinishBtn = document.getElementById('level-6-finish-btn');
 
-        // Function to display persistent messages in the message box
+        // Interactive Tool elements
+        const bInput = document.getElementById('b-input');
+        const cInput = document.getElementById('c-input');
+        const y0Input = document.getElementById('y0-input');
+        const yp0Input = document.getElementById('yp0-input');
+        const tStartInput = document.getElementById('t_start-input');
+        const tEndInput = document.getElementById('t_end-input');
+        const dampingTypeDisplay = document.getElementById('damping-type');
+        const canvas = document.getElementById('solution-canvas');
+        const ctx = canvas.getContext('2d');
+        const noSolutionMessage = document.getElementById('no-solution-message');
+
+
+        const levelTitles = {
+            2: "Level 2: Real, Distinct Roots",
+            3: "Level 3: Real, Repeated Roots",
+            4: "Level 4: Complex Conjugate Roots",
+            5: "Level 5: Initial Conditions",
+            6: "Level 6: Damping Classification"
+        };
+        const levelTopics = {
+            2: "ODEs with real, distinct roots.",
+            3: "ODEs with real, repeated roots.",
+            4: "ODEs with complex conjugate roots.",
+            5: "solving initial value problems for ODEs.",
+            6: "classifying solutions based on damping."
+        };
+        const levelInitialPrompts = {
+            2: "Generate a second-order linear homogeneous ODE with real distinct roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction.",
+            3: "Generate a second-order linear homogeneous ODE with real repeated roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction.",
+            4: "Generate a second-order linear homogeneous ODE with complex conjugate roots for a student to solve. Provide the ODE and the first step of the solution process as guidance, which is to find the characteristic equation. Do not provide the answer. Ensure the ODE is clearly formatted using LaTeX. Your response should start with the ODE, followed by the first instruction.",
+            5: "Generate a second-order linear homogeneous ODE and a set of initial conditions. Guide the student to first find the general solution, and then apply the initial conditions to find the specific solution. The first step is to find the characteristic equation. Ensure the ODE and initial conditions are clearly formatted using LaTeX. Your response should start with the ODE and initial conditions, followed by the first instruction."
+        };
+        const dampingChoices = ['Undamped', 'Lightly Damped', 'Critically Damped', 'Overdamped'];
+
+        // --- Main Menu Functions ---
+        window.showMenu = function() {
+            mainMenuContainer.classList.remove('hidden');
+            odeMasteryContainer.classList.add('hidden');
+            interactiveToolContainer.classList.add('hidden');
+        };
+
+        window.showOdeMastery = function() {
+            mainMenuContainer.classList.add('hidden');
+            odeMasteryContainer.classList.remove('hidden');
+            startLevel(1);
+        };
+
+        window.showInteractiveTool = function() {
+            mainMenuContainer.classList.add('hidden');
+            odeMasteryContainer.classList.add('hidden');
+            interactiveToolContainer.classList.remove('hidden');
+            plotSolution();
+            setupInteractiveToolListeners();
+        };
+
+        // --- ODE Mastery Functions ---
+        function updateScore(points) {
+            userScore += points;
+            userScoreDisplay.textContent = userScore;
+        }
+
         function showMessage(text, isError = false) {
             messageBox.innerHTML = text;
             messageBox.classList.remove('hidden', 'text-green-800', 'bg-green-50', 'text-red-800', 'bg-red-50', 'text-blue-800', 'bg-blue-50');
@@ -180,21 +337,16 @@
             MathJax.typesetPromise();
         }
 
-        // Function to clear the message box
         function clearMessage() {
             messageBox.innerHTML = '';
             messageBox.className = 'hidden p-4 mb-6 text-sm text-blue-800 rounded-lg bg-blue-50';
         }
 
-        // --- Progress Tracker Functions ---
         function updateProgressTracker() {
-            // Reset all to default
             document.querySelectorAll('.tracker-item').forEach(item => {
                 item.classList.remove('active', 'completed');
                 item.classList.add('bg-gray-200');
             });
-
-            // Set status for each level
             for (let i = 1; i <= currentLevel; i++) {
                 const trackerItem = document.getElementById(`tracker-${i}`);
                 if (trackerItem) {
@@ -208,7 +360,6 @@
             }
         }
 
-        // Function to handle clicks on the progress tracker
         window.handleTrackerClick = function(level) {
             if (allowSkip || level <= currentLevel) {
                 startLevel(level);
@@ -217,7 +368,6 @@
             }
         };
 
-        // --- Level 1 Functions ---
         window.generateLevel1Questions = function() {
             const questions = [
                 {
@@ -254,22 +404,17 @@
             let selectedQuestions = [];
             const correctQuestions = questions.filter(q => q.correct);
             const incorrectQuestions = questions.filter(q => !q.correct);
-
             const shuffledCorrect = correctQuestions.sort(() => 0.5 - Math.random());
             const shuffledIncorrect = incorrectQuestions.sort(() => 0.5 - Math.random());
-
             selectedQuestions = shuffledCorrect.slice(0, 2).concat(shuffledIncorrect.slice(0, 2));
             selectedQuestions.sort(() => 0.5 - Math.random());
-
             const container = document.getElementById('level-1-questions');
             container.innerHTML = '';
             userAnswers = {};
             level1CorrectAnswers = {};
-
             selectedQuestions.forEach((q, index) => {
                 const questionId = index;
                 level1CorrectAnswers[questionId] = { answer: q.correct, reason: q.reason };
-
                 const questionHtml = `
                     <div class="bg-gray-100 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between" data-question-id="${questionId}">
                         <span class="font-mono text-lg">${q.text}</span>
@@ -287,12 +432,10 @@
             userAnswers[questionIndex] = answer;
             const parentDiv = button.closest('[data-question-id]');
             const buttons = parentDiv.querySelectorAll('button');
-
             buttons.forEach(btn => {
                 btn.classList.remove('selected-btn');
                 btn.classList.add('bg-gray-300', 'hover:bg-gray-400');
             });
-
             button.classList.add('selected-btn');
             button.classList.remove('bg-gray-300', 'hover:bg-gray-400');
         };
@@ -300,7 +443,7 @@
         window.submitQuiz = function() {
             let allCorrect = true;
             let feedback = "";
-
+            let correctCount = 0;
             for (const qId in level1CorrectAnswers) {
                 if (userAnswers[qId] === undefined) {
                     showMessage("Please answer all questions before submitting.", true);
@@ -309,18 +452,21 @@
                 if (userAnswers[qId] !== level1CorrectAnswers[qId].answer) {
                     allCorrect = false;
                     feedback += `<br/>- Question: ${document.querySelector(`[data-question-id="${qId}"] span`).textContent}. Incorrect. Reason: ${level1CorrectAnswers[qId].reason || 'N/A'}`;
+                } else {
+                    correctCount++;
                 }
             }
-
             if (allCorrect) {
-                showMessage("All answers are correct! You've mastered Level 1.", false);
+                updateScore(correctCount * 10);
+                showMessage(`All answers are correct! You've mastered Level 1 and earned ${correctCount * 10} points!`, false);
                 nextLevelBtn.classList.remove('hidden');
                 level1SubmitBtn.classList.add('hidden');
                 level1NewQuizBtn.classList.add('hidden');
-                currentLevel = 2; // Move to next level
+                currentLevel = 2;
                 updateProgressTracker();
             } else {
-                messageBox.innerHTML = `Some answers were incorrect. Review the reasons below: ${feedback}`;
+                updateScore(correctCount * 10);
+                messageBox.innerHTML = `Some answers were incorrect. You earned ${correctCount * 10} points. Review the reasons below: ${feedback}`;
                 messageBox.classList.remove('hidden');
                 messageBox.classList.add('text-red-800', 'bg-red-50');
                 level1NewQuizBtn.classList.remove('hidden');
@@ -338,28 +484,36 @@
             MathJax.typesetPromise();
         };
 
-        // --- AI-Powered Level Functions with Exponential Backoff ---
         window.startLevel = function(level) {
             currentLevel = level;
             updateProgressTracker();
             clearMessage();
             level1Container.classList.add('hidden');
-            aiLevelContainer.classList.remove('hidden');
-            startAILevel();
+            aiLevelContainer.classList.add('hidden');
+            level6Container.classList.add('hidden');
+
+            if (level === 1) {
+                level1Container.classList.remove('hidden');
+                resetLevel1();
+            } else if (level === 6) {
+                level6Container.classList.remove('hidden');
+                resetLevel6();
+            } else {
+                aiLevelContainer.classList.remove('hidden');
+                startAILevel();
+            }
         };
 
         window.makeApiCall = async function(payload, retries = 0) {
             const apiKey = "AIzaSyCQ5Vre7EEexOV7_jZ8fSEX26wMjjfKqY0";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                if (response.status === 429 && retries < 5) { // Too Many Requests, retry
+                if (response.status === 429 && retries < 5) {
                     const delay = Math.pow(2, retries) * 1000 + Math.random() * 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                     return makeApiCall(payload, retries + 1);
@@ -367,12 +521,10 @@
                 if (!response.ok) {
                     throw new Error(`API error: ${response.statusText}`);
                 }
-
                 const result = await response.json();
                 if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
                     throw new Error('Invalid API response format');
                 }
-
                 return result.candidates[0].content.parts[0].text;
             } catch (error) {
                 console.error('API call failed:', error);
@@ -388,15 +540,11 @@
             submitBtn.disabled = false;
             aiNextLevelBtn.classList.add('hidden');
             aiNewExampleBtn.classList.add('hidden');
-
             aiLevelTitle.textContent = levelTitles[currentLevel];
-            aiLevelSubtitle.textContent = `Let's solve a second-order ODE with ${levelTopics[currentLevel].toLowerCase().replace('odes with ', '')} together. The AI will guide you through the process.`;
-
+            aiLevelSubtitle.textContent = `Let's solve a problem on ${levelTopics[currentLevel].toLowerCase()}. The AI will guide you through the process.`;
             showLoading(true);
-
             const prompt = levelInitialPrompts[currentLevel];
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-
             try {
                 const aiResponseText = await makeApiCall(payload);
                 addMessageToConversation(aiResponseText, 'ai');
@@ -415,35 +563,38 @@
             if (userText === '') {
                 return;
             }
-
             addMessageToConversation(userText, 'user');
             chatHistory.push({ role: 'user', parts: [{ text: userText }] });
             userInput.value = '';
             showLoading(true);
             submitBtn.disabled = true;
-
-            const nextPrompt = `The student is currently working on Level ${currentLevel} of a second-order ODE problem. The topic for this level is ${levelTopics[currentLevel]}. The student's response is: "${userText}". Evaluate their answer. If it is mathematically correct and represents a logical step, provide the next step. If it is incorrect, provide a hint without giving away the full answer. Be conversational and encouraging. Do not give away the final solution until the student reaches the end. Your response should always use LaTeX for equations and formatting. If the student has reached the final solution, provide a clear 'Congratulations!' message and the final solution.`
+            const nextPrompt = `The student is currently working on Level ${currentLevel} of an ODE problem. The topic for this level is ${levelTopics[currentLevel]}. The student's response is: "${userText}". Evaluate their answer. If it is mathematically correct and represents a logical step, provide the next step. If it is incorrect, provide a hint without giving away the full answer. Be conversational and encouraging. Do not give away the final solution until the student reaches the end. Your response should always use LaTeX for equations and formatting. If the student has reached the final solution, provide a clear 'Congratulations!' message and the final solution.`
             chatHistory.push({ role: 'user', parts: [{ text: nextPrompt }] });
-
             const payload = { contents: chatHistory };
-
             try {
                 const aiResponseText = await makeApiCall(payload);
+                if (aiResponseText.toLowerCase().includes("incorrect") || aiResponseText.toLowerCase().includes("try again") || aiResponseText.toLowerCase().includes("not quite")) {
+                    updateScore(-5);
+                }
                 addMessageToConversation(aiResponseText, 'ai');
                 chatHistory.push({ role: 'model', parts: [{ text: aiResponseText }] });
-
                 if (aiResponseText.toLowerCase().includes("congratulations")) {
-                   if (currentLevel < 4) {
+                    updateScore(100);
+                   if (currentLevel < 6) {
                        aiNextLevelBtn.classList.remove('hidden');
                        aiNextLevelBtn.textContent = `Continue to Level ${currentLevel + 1}`;
                        aiNextLevelBtn.onclick = () => startLevel(currentLevel + 1);
-                   } else { // This is the new logic for the final level
-                       showMessage("Congratulations on completing all levels! You have mastered the basics of solving second-order linear homogeneous ODEs.", false);
+                   } else {
+                       showMessage(`Congratulations on completing all six levels! You have mastered the basics of solving ODEs. Your final score is ${userScore}!`, false);
                        userInput.classList.add('hidden');
                        submitBtn.classList.add('hidden');
                        aiNewExampleBtn.classList.remove('hidden');
                        aiNewExampleBtn.textContent = 'Start Over';
-                       aiNewExampleBtn.onclick = () => startLevel(1);
+                       aiNewExampleBtn.onclick = () => {
+                            userScore = 0;
+                            userScoreDisplay.textContent = userScore;
+                            startLevel(1);
+                        };
                    }
                    updateProgressTracker();
                 }
@@ -470,16 +621,305 @@
             loadingSpinner.classList.toggle('hidden', !isLoading);
         };
 
+        window.generateRandomOde = function(dampingType) {
+            let a, b, c;
+            const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            let text = '';
+
+            switch (dampingType) {
+                case 'Undamped':
+                    a = 1;
+                    b = 0;
+                    c = random(1, 10);
+                    text = `$y'' + ${c}y = 0$`;
+                    break;
+                case 'Critically Damped':
+                    const k = random(2, 6);
+                    a = 1;
+                    b = 2 * k;
+                    c = k * k;
+                    text = `$y'' + ${b}y' + ${c}y = 0$`;
+                    break;
+                case 'Overdamped':
+                    a = 1;
+                    b = random(6, 10);
+                    c = random(1, b * b / 4 - 1);
+                    text = `$y'' + ${b}y' + ${c}y = 0$`;
+                    break;
+                case 'Lightly Damped':
+                    a = 1;
+                    b = random(1, 4);
+                    c = random(Math.ceil(b * b / 4) + 1, Math.ceil(b * b / 4) + 5);
+                    text = `$y'' + ${b}y' + ${c}y = 0$`;
+                    break;
+            }
+            return { text, correctAnswer: dampingType };
+        }
+
+        window.shuffleArray = function(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        window.generateLevel6Questions = function() {
+            const dampingTypes = ['Undamped', 'Lightly Damped', 'Critically Damped', 'Overdamped'];
+            shuffleArray(dampingTypes);
+            const questions = dampingTypes.map(type => generateRandomOde(type));
+            const container = document.getElementById('level-6-questions');
+            container.innerHTML = '';
+            userAnswers = {};
+            level6CorrectAnswers = {};
+            questions.forEach((q, index) => {
+                const questionId = index;
+                level6CorrectAnswers[questionId] = q.correctAnswer;
+                const choicesHtml = dampingChoices.map(choice => `
+                    <button onclick="checkLevel6Answer(this, ${questionId}, '${choice}')" class="px-4 py-2 rounded-lg bg-gray-300 text-gray-800 font-medium hover:bg-gray-400 transition-colors">${choice}</button>
+                `).join('');
+                const questionHtml = `
+                    <div class="bg-gray-100 p-4 rounded-lg flex flex-col items-start" data-question-id="${questionId}">
+                        <span class="font-mono text-lg mb-4">${q.text}</span>
+                        <div class="flex flex-wrap gap-2">
+                            ${choicesHtml}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += questionHtml;
+            });
+            MathJax.typesetPromise();
+        };
+
+        window.checkLevel6Answer = function(button, questionIndex, answer) {
+            userAnswers[questionIndex] = answer;
+            const parentDiv = button.closest('[data-question-id]');
+            const buttons = parentDiv.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected-btn');
+                btn.classList.add('bg-gray-300', 'hover:bg-gray-400');
+            });
+            button.classList.add('selected-btn');
+            button.classList.remove('bg-gray-300', 'hover:bg-gray-400');
+        };
+
+        window.submitLevel6Quiz = function() {
+            let allCorrect = true;
+            let feedback = "";
+            let correctCount = 0;
+            for (const qId in level6CorrectAnswers) {
+                if (userAnswers[qId] === undefined) {
+                    showMessage("Please answer all questions before submitting.", true);
+                    return;
+                }
+                const isCorrect = userAnswers[qId] === level6CorrectAnswers[qId];
+                if (isCorrect) {
+                    correctCount++;
+                }
+                allCorrect = allCorrect && isCorrect;
+            }
+            if (allCorrect) {
+                updateScore(correctCount * 25);
+                showMessage(`All answers are correct! You've mastered the final level and earned ${correctCount * 25} points!`, false);
+                level6SubmitBtn.classList.add('hidden');
+                level6NewQuizBtn.classList.add('hidden');
+                level6FinishBtn.classList.remove('hidden');
+            } else {
+                updateScore(correctCount * 25);
+                feedback = `You got ${correctCount} out of 4 correct. Try again!`;
+                showMessage(feedback, true);
+                level6NewQuizBtn.classList.remove('hidden');
+                level6SubmitBtn.classList.add('hidden');
+            }
+            MathJax.typesetPromise();
+        };
+
+        window.resetLevel6 = function() {
+            clearMessage();
+            level6SubmitBtn.classList.remove('hidden');
+            level6NewQuizBtn.classList.add('hidden');
+            level6FinishBtn.classList.add('hidden');
+            level6SubmitBtn.classList.remove('hidden');
+            generateLevel6Questions();
+        };
+
+        // --- Interactive Tool Functions ---
+        function drawAxes(minX, maxX, minY, maxY) {
+            const padding = 40;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillStyle = '#1f2937';
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            ctx.font = '12px Inter';
+
+            // Draw X-axis
+            ctx.beginPath();
+            ctx.moveTo(padding, canvasHeight - padding);
+            ctx.lineTo(canvasWidth - padding, canvasHeight - padding);
+            ctx.stroke();
+
+            // Draw Y-axis
+            ctx.beginPath();
+            ctx.moveTo(padding, canvasHeight - padding);
+            ctx.lineTo(padding, padding);
+            ctx.stroke();
+
+            // Draw X-axis labels and ticks
+            const numXLabels = 5;
+            const xStep = (maxX - minX) / numXLabels;
+            for (let i = 0; i <= numXLabels; i++) {
+                const x = padding + (i / numXLabels) * (canvasWidth - 2 * padding);
+                const label = (minX + i * xStep).toFixed(1);
+                ctx.fillText(label, x - 10, canvasHeight - padding + 20);
+                ctx.beginPath();
+                ctx.moveTo(x, canvasHeight - padding);
+                ctx.lineTo(x, canvasHeight - padding + 5);
+                ctx.stroke();
+            }
+
+            // Draw Y-axis labels and ticks
+            const numYLabels = 5;
+            const yStep = (maxY - minY) / numYLabels;
+            for (let i = 0; i <= numYLabels; i++) {
+                const y = canvasHeight - padding - (i / numYLabels) * (canvasHeight - 2 * padding);
+                const label = (minY + i * yStep).toFixed(1);
+                ctx.fillText(label, padding - 35, y + 5);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(padding - 5, y);
+                ctx.stroke();
+            }
+
+            // Axis labels
+            ctx.fillText("Time (t)", canvasWidth / 2 - 20, canvasHeight - 5);
+            ctx.save();
+            ctx.translate(15, canvasHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText("y(t)", 0, 0);
+            ctx.restore();
+        }
+
+        function plotSolution() {
+            const b = parseFloat(bInput.value);
+            const c = parseFloat(cInput.value);
+            const y0 = parseFloat(y0Input.value);
+            const yp0 = parseFloat(yp0Input.value);
+            const tStart = parseFloat(tStartInput.value);
+            const tEnd = parseFloat(tEndInput.value);
+
+            if (isNaN(b) || isNaN(c) || isNaN(y0) || isNaN(yp0) || isNaN(tStart) || isNaN(tEnd) || tStart >= tEnd) {
+                drawAxes(0, 1, 0, 1);
+                noSolutionMessage.classList.remove('hidden');
+                return;
+            }
+            noSolutionMessage.classList.add('hidden');
+
+            const D = b * b - 4 * c; // Discriminant
+            const epsilon = 1e-9; // Tolerance for floating-point comparison
+            let solutionFunc;
+            let type = '';
+
+            if (b === 0 && c > 0) {
+                // Undamped
+                type = 'Undamped';
+                const omega = Math.sqrt(c);
+                const A = y0;
+                const B = yp0 / omega;
+                solutionFunc = t => A * Math.cos(omega * t) + B * Math.sin(omega * t);
+            } else if (Math.abs(D) < epsilon) {
+                // Critically Damped
+                type = 'Critically Damped';
+                const r = -b / 2;
+                const C1 = y0;
+                const C2 = yp0 - r * y0;
+                solutionFunc = t => (C1 + C2 * t) * Math.exp(r * t);
+            } else if (D > 0) {
+                // Overdamped
+                type = 'Overdamped';
+                const r1 = (-b + Math.sqrt(D)) / 2;
+                const r2 = (-b - Math.sqrt(D)) / 2;
+                const C1 = (yp0 - r2 * y0) / (r1 - r2);
+                const C2 = y0 - C1;
+                solutionFunc = t => C1 * Math.exp(r1 * t) + C2 * Math.exp(r2 * t);
+            } else if (D < 0) {
+                // Lightly Damped (Underdamped)
+                type = 'Lightly Damped';
+                const alpha = -b / 2;
+                const beta = Math.sqrt(-D) / 2;
+                const C1 = y0;
+                const C2 = (yp0 - alpha * y0) / beta;
+                solutionFunc = t => Math.exp(alpha * t) * (C1 * Math.cos(beta * t) + C2 * Math.sin(beta * t));
+            }
+
+            dampingTypeDisplay.textContent = type;
+            dampingTypeDisplay.className = 'font-bold';
+            if (type === 'Undamped') dampingTypeDisplay.classList.add('text-green-600');
+            else if (type === 'Lightly Damped') dampingTypeDisplay.classList.add('text-blue-600');
+            else if (type === 'Critically Damped') dampingTypeDisplay.classList.add('text-yellow-600');
+            else if (type === 'Overdamped') dampingTypeDisplay.classList.add('text-red-600');
+            else dampingTypeDisplay.classList.add('text-gray-600');
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const plotWidth = width - 80; // Padding
+            const plotHeight = height - 80; // Padding
+            const points = [];
+            const step = (tEnd - tStart) / 1000;
+            let minY = Infinity;
+            let maxY = -Infinity;
+
+            for (let t = tStart; t <= tEnd; t += step) {
+                const y = solutionFunc(t);
+                points.push({t, y});
+                if (y > maxY) maxY = y;
+                if (y < minY) minY = y;
+            }
+
+            const yRange = maxY - minY;
+            const yPadding = yRange * 0.1 || 1;
+            const yMinAdjusted = minY - yPadding;
+            const yMaxAdjusted = maxY + yPadding;
+
+            drawAxes(tStart, tEnd, yMinAdjusted, yMaxAdjusted);
+
+            // Draw solution
+            ctx.beginPath();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+
+            points.forEach((point, index) => {
+                const x = 40 + (point.t - tStart) / (tEnd - tStart) * plotWidth;
+                const y = 40 + (1 - (point.y - yMinAdjusted) / (yMaxAdjusted - yMinAdjusted)) * plotHeight;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+        }
+
+        function setupInteractiveToolListeners() {
+            bInput.addEventListener('input', plotSolution);
+            cInput.addEventListener('input', plotSolution);
+            y0Input.addEventListener('input', plotSolution);
+            yp0Input.addEventListener('input', plotSolution);
+            tStartInput.addEventListener('input', plotSolution);
+            tEndInput.addEventListener('input', plotSolution);
+            window.addEventListener('resize', plotSolution);
+            plotSolution();
+        }
+
+        // Initial setup on page load
         window.onload = function() {
             userInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     submitAIResponse();
                 }
             });
-
-            // Initial setup
-            resetLevel1();
-            updateProgressTracker();
+            showMenu(); // Start with the main menu
         };
     </script>
 </body>
